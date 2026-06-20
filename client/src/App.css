@@ -1,0 +1,105 @@
+.remove-btn {
+  margin-right: 10px;
+  background-color: #ff4d4d;
+}
+
+.smart-list-shell {
+  margin-top: 1.5rem;
+}
+
+.assistant-panel {
+  align-items: center;
+  background: #f6f8fb;
+  border: 1px solid #dde5ef;
+  border-radius: 8px;
+  display: flex;
+  gap: 1rem;
+  justify-content: space-between;
+  margin-bottom: 1rem;
+  padding: 1rem;
+}
+
+.assistant-label {
+  color: #596579;
+  font-size: 0.78rem;
+  letter-spacing: 0;
+  margin: 0 0 0.2rem;
+  text-transform: uppercase;
+}
+
+.assistant-panel h5 {
+  margin: 0;
+}
+
+.suggestion-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  justify-content: flex-end;
+}
+
+.suggestion-chip {
+  align-items: center;
+  border-color: #cbd5e1;
+  display: inline-flex;
+  gap: 0.5rem;
+  min-height: 2.4rem;
+}
+
+.empty-suggestions {
+  color: #697386;
+}
+
+.smart-input-row {
+  align-items: center;
+  display: flex;
+  gap: 0.75rem;
+  justify-content: space-between;
+  margin-top: 0.8rem;
+}
+
+.item-content {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.item-name {
+  font-weight: 600;
+}
+
+.item-meta {
+  align-items: center;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.item-meta small {
+  color: #697386;
+}
+
+@media (max-width: 640px) {
+  .assistant-panel {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .suggestion-grid {
+    justify-content: flex-start;
+  }
+}
+.fade-enter {
+  opacity: 0;
+}
+.fade-enter-active {
+  opacity: 1;
+  transition: opacity 300ms;
+}
+.fade-exit {
+  opacity: 1;
+}
+.fade-exit-active {
+  opacity: 0;
+  transition: opacity 300ms;
+}
