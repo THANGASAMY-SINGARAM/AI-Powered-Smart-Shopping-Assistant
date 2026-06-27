@@ -57,7 +57,7 @@ class AppNavbar extends Component {
       <div>
         <Navbar color="dark" dark expand="sm" className="mb-5">
           <Container className="d-flex align-items-center">
-            <NavbarBrand href="/">Shopping List</NavbarBrand>
+            <NavbarBrand href="/">CommerceHub</NavbarBrand>
             <NavbarToggler onClick={this.toggle} />
             <Collapse isOpen={this.state.isOpen} navbar>
               <Nav className="ms-auto" navbar>

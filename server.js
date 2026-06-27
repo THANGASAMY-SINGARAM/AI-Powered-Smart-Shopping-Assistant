@@ -18,6 +18,9 @@ mongoose
 app.use('/api/items', require('./routes/api/items'));
 app.use('/api/users', require('./routes/api/users'));
 app.use('/api/auth', require('./routes/api/auth'));
+app.use('/api/products', require('./routes/api/products'));
+app.use('/api/cart', require('./routes/api/cart'));
+app.use('/api/orders', require('./routes/api/orders'));
 
 if (process.env.NODE_ENV === 'production') {
   app.use(express.static('client/build'));

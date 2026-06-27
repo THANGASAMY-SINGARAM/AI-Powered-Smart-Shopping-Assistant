@@ -1,21 +1,21 @@
-# AI-Powered Smart Shopping Assistant
+# AI-Powered E-Commerce Platform
 
-A full-stack MERN shopping assistant that makes shopping-list management smarter with AI-based item categorization, voice-based item entry, purchase history tracking, personalized recommendations, and intelligent next-item prediction.
+A full-stack MERN e-commerce platform with JWT authentication, product listings, search and filters, shopping cart, checkout, admin inventory management, and AI-powered product recommendations.
 
-This project upgrades a basic shopping list into an AI-enabled assistant by combining a React/Redux frontend, Express and MongoDB backend, browser speech recognition, and a lightweight Python NLP model.
+The project started as an AI smart shopping assistant and now includes a complete commerce flow while preserving the original AI shopping-list API as a legacy assistant feature.
 
 ## Features
 
-- Voice-based item entry using the browser Speech Recognition API
-- Automatic product categorization into groups such as Groceries, Electronics, Stationery, Household, and Personal Care
-- AI confidence score for categorized items
-- Personalized shopping recommendations based on previous shopping history
-- Intelligent next-item prediction using frequently purchased and related products
-- Purchase history tracking through stored shopping items
-- User authentication with JWT
-- Protected add/delete item actions for logged-in users
-- Responsive React UI with category badges and recommendation chips
-- Python AI model with JavaScript fallback for environments where Python is not installed
+- User registration and login with JWT authentication
+- Role-based access with customer and admin users
+- Product catalog with search, category filters, price filters, stock filter, and sorting
+- Shopping cart with authenticated add, update, remove, and clear actions
+- Checkout flow with mock Stripe-style payment references
+- Order history for customers
+- Admin dashboard for adding products, seeding sample inventory, updating stock, and viewing recent orders
+- AI-powered product recommendations based on cart categories and featured product trends
+- Responsive React UI built with Bootstrap and Reactstrap
+- Legacy AI shopping-list assistant endpoints for item categorization and next-item suggestions
 
 ## Tech Stack
 
@@ -26,7 +26,6 @@ This project upgrades a basic shopping list into an AI-enabled assistant by comb
 - Reactstrap
 - Bootstrap
 - Axios
-- Browser Speech Recognition API
 
 **Backend**
 
@@ -37,11 +36,11 @@ This project upgrades a basic shopping list into an AI-enabled assistant by comb
 - JWT authentication
 - bcryptjs password hashing
 
-**AI / ML**
+**AI / Recommendations**
 
-- Python NLP script for item categorization and shopping suggestions
-- Rule-based recommendation logic using purchase history and product pairings
-- JavaScript fallback model for category prediction and recommendations
+- Product recommendation API using cart context and featured product trends
+- Legacy Python NLP script for shopping-list item categorization
+- JavaScript fallback logic for environments where Python is unavailable
 
 ## Project Structure
 
@@ -54,20 +53,29 @@ AI-Powered-Smart-Shopping-Assistant/
 │   └── src/
 │       ├── actions/
 │       ├── components/
+│       │   ├── auth/
+│       │   └── ECommercePlatform.js
 │       ├── reducers/
 │       ├── App.js
 │       └── store.js
 ├── config/
 │   └── default.json
 ├── middleware/
+│   ├── admin.js
 │   └── auth.js
 ├── models/
+│   ├── Cart.js
 │   ├── Item.js
+│   ├── Order.js
+│   ├── Product.js
 │   └── user.js
 ├── routes/
 │   └── api/
 │       ├── auth.js
+│       ├── cart.js
 │       ├── items.js
+│       ├── orders.js
+│       ├── products.js
 │       └── users.js
 ├── server.js
 ├── package.json
@@ -76,12 +84,13 @@ AI-Powered-Smart-Shopping-Assistant/
 
 ## How It Works
 
-1. A user signs in and adds a shopping item manually or through voice input.
-2. The backend analyzes the item name using the Python NLP model when Python is available.
-3. If Python is not available, the Express backend uses a built-in JavaScript fallback model.
-4. The item is saved in MongoDB with category, confidence score, date, and voice-entry status.
-5. The assistant reviews recent shopping history and generates predicted next items.
-6. The frontend displays recommendations as clickable chips so users can quickly add suggested items.
+1. A user registers or logs in.
+2. The first registered user is automatically assigned the `admin` role for local setup.
+3. Admins can seed a sample catalog or add inventory from the admin dashboard.
+4. Customers browse products, search, filter, sort, and add items to the cart.
+5. The recommendation strip suggests products using cart categories or featured trends.
+6. Checkout creates an order, generates a mock payment reference, reduces stock, and clears the cart.
+7. Customers can view order history, while admins can monitor recent orders and update inventory.
 
 ## Installation
 
@@ -135,6 +144,28 @@ The Express API runs on:
 http://localhost:5000
 ```
 
+## Admin Setup
+
+The first user registered in a fresh database becomes an admin automatically. After logging in as that user:
+
+1. Open the `Admin` tab.
+2. Click `Seed catalog` to add sample products.
+3. Add new products or update stock from the inventory panel.
+
+Later users are registered as customers by default.
+
+## Checkout and Payments
+
+Checkout currently uses a mock payment provider that behaves like a Stripe integration placeholder:
+
+- It validates cart stock.
+- It creates an order.
+- It stores a mock payment reference.
+- It decrements product inventory.
+- It clears the user's cart.
+
+To connect real Stripe payments later, replace the mock payment section in `routes/api/orders.js` with Stripe PaymentIntent creation and webhook confirmation.
+
 ## Available Scripts
 
 ```bash
@@ -161,17 +192,44 @@ npm start
 
 Runs the Express backend in normal Node mode.
 
+```bash
+npm run build --prefix client
+```
+
+Builds the React frontend for production.
+
 ## API Overview
 
-### Items
+### Products
 
 | Method | Endpoint | Description | Access |
 | --- | --- | --- | --- |
-| GET | `/api/items` | Get all shopping items | Public |
-| POST | `/api/items` | Add a new shopping item with AI category metadata | Private |
-| DELETE | `/api/items/:id` | Delete a shopping item | Private |
-| POST | `/api/items/ai/analyze` | Analyze and categorize item text | Public |
-| GET | `/api/items/ai/suggestions` | Generate shopping recommendations | Public |
+| GET | `/api/products` | List products with search, filters, and sorting | Public |
+| GET | `/api/products/meta/categories` | List product categories | Public |
+| GET | `/api/products/recommendations` | Get AI-style product recommendations | Public |
+| POST | `/api/products/seed` | Seed sample products | Admin |
+| POST | `/api/products` | Create a product | Admin |
+| PUT | `/api/products/:id` | Update a product | Admin |
+| DELETE | `/api/products/:id` | Delete a product | Admin |
+
+### Cart
+
+| Method | Endpoint | Description | Access |
+| --- | --- | --- | --- |
+| GET | `/api/cart` | Get the authenticated user's cart | Private |
+| POST | `/api/cart/items` | Add a product to cart | Private |
+| PUT | `/api/cart/items/:productId` | Update cart quantity | Private |
+| DELETE | `/api/cart/items/:productId` | Remove a product from cart | Private |
+| DELETE | `/api/cart` | Clear cart | Private |
+
+### Orders
+
+| Method | Endpoint | Description | Access |
+| --- | --- | --- | --- |
+| GET | `/api/orders` | Get authenticated user's orders | Private |
+| GET | `/api/orders/admin` | Get all recent orders | Admin |
+| POST | `/api/orders/checkout` | Checkout cart and create order | Private |
+| PUT | `/api/orders/:id/status` | Update order status | Admin |
 
 ### Auth
 
@@ -181,51 +239,24 @@ Runs the Express backend in normal Node mode.
 | POST | `/api/auth` | Login user |
 | GET | `/api/auth/user` | Get authenticated user |
 
-## AI Features
+### Legacy AI Shopping List
 
-### Automatic Categorization
-
-The assistant analyzes item text and predicts a category such as:
-
-- Groceries
-- Electronics
-- Stationery
-- Household
-- Personal Care
-- Other
-
-Each saved item includes an AI confidence score.
-
-### Personalized Recommendations
-
-The recommendation engine uses previous shopping items and known product pairings. For example:
-
-- Milk may suggest Bread, Eggs, or Cereal
-- Laptop may suggest Mouse, Keyboard, or USB Cable
-- Notebook may suggest Pen, Pencil, or Eraser
-
-### Python Model Support
-
-The file `ai/shopping_ai.py` contains the Python NLP logic. The backend automatically attempts to run it using:
-
-- `python`
-- `python3`
-- `py -3`
-
-If Python is unavailable, the app still works using the JavaScript fallback model.
-
-## Voice Input Notes
-
-Voice entry depends on browser support for the Speech Recognition API. It works best in Chromium-based browsers such as Google Chrome or Microsoft Edge.
+| Method | Endpoint | Description | Access |
+| --- | --- | --- | --- |
+| GET | `/api/items` | Get all shopping-list items | Public |
+| POST | `/api/items` | Add a shopping-list item with AI category metadata | Private |
+| DELETE | `/api/items/:id` | Delete a shopping-list item | Private |
+| POST | `/api/items/ai/analyze` | Analyze and categorize item text | Public |
+| GET | `/api/items/ai/suggestions` | Generate shopping-list recommendations | Public |
 
 ## Future Improvements
 
-- Train a machine learning model on a larger shopping dataset
-- Add computer vision support for receipt scanning
-- Add barcode scanning for product entry
-- Add price tracking and budget prediction
-- Build user-specific recommendation profiles
-- Add item quantity, priority, and completed status
+- Replace mock checkout with a full Stripe PaymentIntent and webhook flow
+- Add product reviews and ratings from real customer activity
+- Add admin order status controls in the frontend
+- Add user profile and saved addresses
+- Add recommendation tracking from purchases and browsing events
+- Add automated tests for cart, checkout, and admin routes
 - Deploy backend and frontend to cloud platforms
 
 ## License
