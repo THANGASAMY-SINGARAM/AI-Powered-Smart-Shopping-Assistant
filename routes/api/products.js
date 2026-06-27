@@ -79,6 +79,17 @@ const seedProducts = [
   }
 ];
 
+const ensureSeedProducts = async () => {
+  const count = await Product.countDocuments();
+
+  if (count) {
+    return { inserted: 0 };
+  }
+
+  const products = await Product.insertMany(seedProducts);
+  return { inserted: products.length };
+};
+
 const buildQuery = ({ search, category, minPrice, maxPrice, inStock }) => {
   const query = {};
 
@@ -105,6 +116,8 @@ const buildQuery = ({ search, category, minPrice, maxPrice, inStock }) => {
 
 router.get('/', async (req, res) => {
   try {
+    await ensureSeedProducts();
+
     const sortMap = {
       newest: { createdAt: -1 },
       priceAsc: { price: 1 },
@@ -121,6 +134,8 @@ router.get('/', async (req, res) => {
 
 router.get('/meta/categories', async (req, res) => {
   try {
+    await ensureSeedProducts();
+
     const categories = await Product.distinct('category');
     res.json(categories.sort());
   } catch (err) {
@@ -130,6 +145,8 @@ router.get('/meta/categories', async (req, res) => {
 
 router.get('/recommendations', async (req, res) => {
   try {
+    await ensureSeedProducts();
+
     const cartCategories = (req.query.categories || '').split(',').filter(Boolean);
     const query = cartCategories.length ? { category: { $in: cartCategories } } : { featured: true };
     const products = await Product.find(query).sort({ rating: -1, featured: -1 }).limit(6);
@@ -146,13 +163,12 @@ router.get('/recommendations', async (req, res) => {
 
 router.post('/seed', auth, admin, async (req, res) => {
   try {
-    const count = await Product.countDocuments();
-    if (count) {
+    const result = await ensureSeedProducts();
+    if (!result.inserted) {
       return res.json({ inserted: 0, msg: 'Products already exist' });
     }
 
-    const products = await Product.insertMany(seedProducts);
-    res.status(201).json({ inserted: products.length });
+    res.status(201).json(result);
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
